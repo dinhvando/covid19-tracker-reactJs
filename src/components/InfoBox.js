@@ -7,17 +7,18 @@ const useInfoBoxStyles = makeStyles(()=>{
     return{
         cardRoot:{
             width: "30%",
-            textAlign: "center"
+            textAlign: "center",
+            cursor: "pointer"
         },
         title:{
             textTransform: "uppercase"
         }
     }
 })
-export const InfoBox = ({title, cases, total})=>{
+export const InfoBox = ({title, cases, total,onCLick})=>{
     const InfoBoxStyles = useInfoBoxStyles();
     return(
-        <Card raised className={`${InfoBoxStyles.cardRoot} cardItem--${title}`}>
+        <Card raised className={`${InfoBoxStyles.cardRoot} cardItem--${title}`} onCLick={onCLick}>
             <CardContent>
                 <Typography className={InfoBoxStyles.title} variant="h5">{title}</Typography>
                 <Typography variant="h5">+ {numeral(cases).format("0,0")}</Typography>

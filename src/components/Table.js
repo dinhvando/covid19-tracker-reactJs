@@ -33,10 +33,10 @@ export const RankingTable = ({tableData}) => {
           </TableRow>
         </TableHead>
         <TableBody>
-            {tableData.map(({country,flag,cases},index)=>(
+            {tableData.map(({name,flag,cases},index)=>(
                 <TableRow key = {index}>
                     <TableCell className={tableStyles.tableCell} align="left">{index + 1}</TableCell>
-                    <TableCell  className={clsx(tableStyles.tableCell,tableStyles.countryInfo)} align="left"><img className={tableStyles.image} alt={country} src={flag}/> {country} </TableCell>
+                    <TableCell  className={clsx(tableStyles.tableCell,tableStyles.countryInfo)} align="left"><img className={tableStyles.image} alt={name} src={flag}/> {name} </TableCell>
                     <TableCell  className={tableStyles.tableCell} align="left">{numeral(cases).format("0,0")}</TableCell>    
                 </TableRow>
             ))}

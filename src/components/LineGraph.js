@@ -3,40 +3,47 @@ import React,{useState,useEffect} from 'react'
 import { Line } from 'react-chartjs-2';
 import {fetchCountryMonthlyData} from '../api/index'
 import numeral from 'numeral'
-export const LineGraph = ({ country, caseType }) => {
-   const [data,setData] = useState({});
+
+
+
+export const LineGraph = React.memo(({ data}) => {
+
 
     const color = {
         cases: 'rgba(0,0,255,0.5)',
         recovered: 'rgba(0,255,0,0.5)',
         deaths: 'rgba(255,0,0,0.5)',
     }
-    useEffect(()=>{
-        const fetchAPI = async() => {
-        setData(await fetchCountryMonthlyData(country));
-    }
-    fetchAPI();
-    },[country])
-   
+    const caseType = ['cases','recovered','deaths']
     const buildChartData = () => {
-        const chartDataRes = [];
-        let lastDataPoint;
-        for (let date in data[caseType]) {
-            if(lastDataPoint){
-                const newDataPoint = {
-                    x: date,
-                    y: data[caseType][date] - lastDataPoint
+        const finalRes = [];
+        for(let i = 0; i < caseType.length; i++) {
+            const chartDataRes = [];
+            let lastDataPoint;
+            for (let date in data[caseType[i]]) {
+                if(lastDataPoint){
+                    const newDataPoint = {
+                        x: date,
+                        y: data[caseType[i]][date] - lastDataPoint
+                    }
+                    chartDataRes.push(newDataPoint);
                 }
-                chartDataRes.push(newDataPoint);
+                lastDataPoint = data[caseType[i]][date] 
             }
-            lastDataPoint = data[caseType][date] 
-           
+            finalRes.push(chartDataRes);
         }
-        return chartDataRes;
+      
+       return finalRes;
     }
+    
     const options = {
         legend: {
-            display: false
+           
+            labels:{
+                font:{
+                    size: 20
+                }
+            }
         },
         elements: {
             point: {
@@ -83,14 +90,31 @@ export const LineGraph = ({ country, caseType }) => {
             {getData.length !== 0 &&
                 (<Line 
                     data={{
-                        labels: getData.map(({ x }) => x),
+                        labels: getData[0].map(({ x }) => x),
                         datasets: [
                             {
-                                data: getData.map(({ y }) => parseInt(y)),
-                                label: caseType,
-                                borderColor: color[caseType],
-                                fill: true
+                                data: getData[0].map(({ y }) => parseInt(y)),
+                                label: caseType[0],
+                                borderColor: color[caseType[0]],
+                                fill: false,
+                                backgroundColor: color[caseType[0]],
+                            },
+                            {
+                                data: getData[1].map(({ y }) => parseInt(y)),
+                                label: caseType[1],
+                                borderColor: color[caseType[1]],
+                                fill: false,
+                                backgroundColor: color[caseType[1]],
+                            },
+                            {
+                                data: getData[2].map(({ y }) => parseInt(y)),
+                                label: caseType[2],
+                                borderColor: color[caseType[2]],
+                                fill: false,
+                                backgroundColor: color[caseType[2]],
                             }
+
+
                         ]
                     }}
                 />)
@@ -98,7 +122,7 @@ export const LineGraph = ({ country, caseType }) => {
             }
         </>
     )
-}
+})
 
 
 

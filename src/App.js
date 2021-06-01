@@ -1,7 +1,7 @@
-import React,{useState, useEffect} from 'react'
+import React,{ useEffect} from 'react'
 import './App.css';
 import classNames from 'classnames';
-import {Header} from './components/Header'
+
 import {InfoBox} from './components/InfoBox'
 import {Card, CardContent, Typography,FormControl, Select, MenuItem} from '@material-ui/core';
 import styled from 'styled-components';
@@ -10,12 +10,16 @@ import BoYTe from './assets/img/BoYTe.png'
 import {LineGraph} from './components/LineGraph'
 import {Map} from './components/Map'
 import {RankingTable} from './components/Table'
-import {fectCountries} from './api/index'
-import {fetchCountryData} from './api/index'
-import {fetchCountryMonthlyData} from './api/index';
+import "leaflet/dist/leaflet.css";
 
 import {sortData} from './utils'
-
+// redux
+import {useSelector, useDispatch} from 'react-redux'
+import {fetchCountry} from './store/country'
+import {changeCountry} from './store/country'
+import {fetchGlobalData} from './store/country'
+import {fetchHistoryCountryData} from './store/country'
+import {changeCaseType, setCenter} from './store/Map'
 const Container = styled.div`
     display: flex;
     justify-content:space-between;
@@ -33,29 +37,33 @@ const MiddleImage = styled.img`
     height: inherit;
 `
 function App() {
-  const [countries,setCountries] = useState([]);
-  const [country,setCountry] = useState('worldwide'); 
-  const [countryInfo,setCountryInfo] = useState({});
-
-  const [tableData, setTableData] = useState([]);
+  const dispatch = useDispatch();
+  const countryList = useSelector(state => state.country.countryInfo);
+  const currentCountry = useSelector(state => state.country.currentCountry);
+  const globalData = useSelector(state => state.country.globalData);
+  const historyData = useSelector(state => state.country.historyData);
+  const mapCenter = useSelector(state => state.map.mapCenter);
+  const mapZoom = useSelector(state => state.map.mapZoom);
+  const caseType = useSelector(state => state.map.caseType)
+  const currentCountryInfo = countryList.find(country => country.name === currentCountry);
   useEffect(()=>{
-    const fetchAPI = async () =>{
-      const countries = await(fectCountries());
-      setCountries(countries);
-      setTableData(sortData(countries));
-    }
-    fetchAPI();
+ 
+    dispatch(fetchCountry())
+    dispatch(fetchGlobalData())
+    dispatch(fetchHistoryCountryData(currentCountry))
   },[])
   useEffect(()=>{
-    const fetchAPI = async ()=>{
-     setCountryInfo(await fetchCountryData(country));
-   
-    }
-    fetchAPI();
-  },[country]) 
+    dispatch(fetchHistoryCountryData(currentCountry))
+    if(currentCountry !== 'worldwide')
+    dispatch(setCenter([currentCountryInfo.lat, currentCountryInfo.long]))
+    else
+    dispatch(setCenter([21, 105.8]))
+  },[currentCountry])
+
   const handleChange = (e) => {
-    setCountry(e.target.value)
+    dispatch(changeCountry(e.target.value))
   }
+  console.log(caseType)
   return (
     <div className="App">
       <div className="app__left">
@@ -66,33 +74,30 @@ function App() {
             <MiddleImage src ={BoYTe}/>
             </MiddleImageList>
             <FormControl style ={{minWidth: "200px"}}>
-                <Select style={{fontSize:"20px"}} variant="outlined" value={country} onChange={handleChange}>
-                    <MenuItem style={{fontSize:"20px"}}  value = "worldwide">Worldwide</MenuItem>
-                    {countries.map(country =>(
-                        <MenuItem style={{fontSize:"20px"}} value = {country.country}>{country.country} </MenuItem>
-                    ))}
+                <Select style={{fontSize:"20px"}} variant="outlined" value={currentCountry}  onChange={handleChange}>
+                    <MenuItem style={{fontSize:"20px"}} value = "worldwide">Worldwide</MenuItem>
+                   {countryList.map(({name},index) => (<MenuItem key={index} style={{fontSize:"20px"}}  value = {name}>{name}</MenuItem>))}
                 </Select>
             </FormControl>
         </Container>
       <div className="app__stats">
-        <InfoBox  title = "Infected" cases ={countryInfo.todayCases} total={countryInfo.cases} className={classNames('cardItem', 'cardItem--infected')}/>
-        <InfoBox title ="Recovered" cases ={countryInfo.todayRecovered} total={countryInfo.recovered}/>
-        <InfoBox title = "Deaths" cases ={countryInfo?.todayDeaths} total={countryInfo.deaths}/>
+        <InfoBox onCLick = {e => dispatch(changeCaseType('cases'))}  title = "Infected" cases ={currentCountry ==='worldwide' ? globalData.todayCases :  currentCountryInfo.todayCases} total={currentCountry ==='worldwide' ? globalData.cases : currentCountryInfo.cases} className={classNames('cardItem', 'cardItem--infected')}/>
+        <InfoBox onCLick = {e => dispatch(changeCaseType('recovered'))}   title ="Recovered"cases ={currentCountry ==='worldwide' ? globalData.todayRecovered :  currentCountryInfo.todayRecovered} total={currentCountry ==='worldwide' ? globalData.recovered : currentCountryInfo.recovered}/>
+        <InfoBox  onCLick = {e => dispatch(changeCaseType('deaths'))}  title = "Deaths" cases ={currentCountry ==='worldwide' ? globalData.todayDeaths :  currentCountryInfo.todayDeaths} total={currentCountry ==='worldwide' ? globalData.deaths : currentCountryInfo.deaths}/>
       </div>
-      <div className="app__chart">
-        <LineGraph country={country} caseType="cases"/>
-        <LineGraph country={country} caseType="recovered"/>
-        <LineGraph country={country} caseType="deaths"/>
+      <div className="app__chart" >
+        <LineGraph data={historyData} />
       </div>
+
+      <Map countries={countryList} casesType={caseType} center={mapCenter} zoom={mapZoom}/>
       </div>
         <Card className="app__right">
               <div className="table__content">
                 <h1>Live Cases by Country</h1>
-                <RankingTable tableData={tableData}/>
+                <RankingTable tableData={ sortData(countryList)}/>
               </div>
         </Card>
     </div>
-    
   );
 }
 
