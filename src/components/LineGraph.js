@@ -90,7 +90,6 @@ export const LineGraph = React.memo(({ data}) => {
             {getData.length !== 0 &&
                 (<Line 
                     data={{
-<<<<<<< HEAD
                         labels: getData[0].map(({ x }) => x),
                         datasets: [
                             {
@@ -116,16 +115,6 @@ export const LineGraph = React.memo(({ data}) => {
                             }
 
 
-=======
-                        labels: getData.map(({ x }) => x),
-                        datasets: [
-                            {
-                                data: getData.map(({ y }) => parseInt(y)),
-                                label: caseType,
-                                borderColor: color[caseType],
-                                fill: true
-                            }
->>>>>>> 5e996a8 (covid-tracker)
                         ]
                     }}
                 />)
@@ -133,11 +122,7 @@ export const LineGraph = React.memo(({ data}) => {
             }
         </>
     )
-<<<<<<< HEAD
 })
-=======
-}
->>>>>>> 5e996a8 (covid-tracker)
 
 
 
