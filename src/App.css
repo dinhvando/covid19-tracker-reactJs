@@ -24,9 +24,6 @@
 }
 .table__content{
   text-align: center;
-  max-height: 100vh;
+  max-height: 72vh;
   overflow-y: scroll;
-}
-.app__chart > canvas{
-  height:680px !important;
 }
