@@ -24,6 +24,6 @@
 }
 .table__content{
   text-align: center;
-  max-height: 72vh;
+  height: 100vh;
   overflow-y: scroll;
 }

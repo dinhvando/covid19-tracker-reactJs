@@ -47,7 +47,6 @@ function App() {
   const caseType = useSelector(state => state.map.caseType)
   const currentCountryInfo = countryList.find(country => country.name === currentCountry);
   useEffect(()=>{
- 
     dispatch(fetchCountry())
     dispatch(fetchGlobalData())
     dispatch(fetchHistoryCountryData(currentCountry))
@@ -63,7 +62,7 @@ function App() {
   const handleChange = (e) => {
     dispatch(changeCountry(e.target.value))
   }
-  console.log(caseType)
+
   return (
     <div className="App">
       <div className="app__left">
